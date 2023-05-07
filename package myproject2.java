@@ -21,16 +21,12 @@ public class MaxTemperature {
 	  @Override
 	  public void map(LongWritable key, Text value, Context context)
 	      throws IOException, InterruptedException {
-	    //fetching relevant information from in form of substrings
-		//dataset used had no partition/separation key
-		//one method was to make changes in dataset by setting partition key
-		//if we look at data the string length and its format it is consistent so we can fetch substrings
-		//by mentioning indexes
+	    //fetch information in form of substrings from a single string
 	    String line = value.toString();
-	    String year = line.substring(15, 19);//fetching year
+	    String year = line.substring(15, 19);//getting year
 	    int airTemperature;
-	  //fetching air temperature
-	    if (line.charAt(87) == '+') { // parseInt can not handle other characters
+	    //extracting air temperature
+	    if (line.charAt(87) == '+') { //exception for char
 	      airTemperature = Integer.parseInt(line.substring(88, 92));
 	    } else {
 	      airTemperature = Integer.parseInt(line.substring(87, 92));
@@ -53,7 +49,7 @@ public class MaxTemperature {
 	    
 	    int maxValue = Integer.MIN_VALUE;
 	    for (IntWritable value : values) {
-	      maxValue = Math.max(maxValue, value.get());//getting the max temp value
+	      maxValue = Math.max(maxValue, value.get());//getting the maximum value from the map of strings
 	    }
 	    context.write(key, new IntWritable(maxValue/10));
 	  }
@@ -64,16 +60,16 @@ public static void main(String[] args) throws Exception {
       System.err.println("Usage: MaxTemperature <input path> <output path>");
       System.exit(-1);
     }
-    //creating a new config
+    //configuration
     Configuration conf = new Configuration();
-    //creating new job using that config
-    Job job = Job.getInstance(conf, "maxtemp");//giving maxtemp name to job we created
+    //initializing job
+    Job job = Job.getInstance(conf, "maxtemp");//setting name of ther job
     job.setJarByClass(MaxTemperature.class);
-    FileInputFormat.addInputPath(job, new Path(args[0]));//setting input path from arguments
-    FileOutputFormat.setOutputPath(job, new Path(args[1]));//setting output path from arguments
+    FileInputFormat.addInputPath(job, new Path(args[0]));//input path from cmd arguments
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));//output path from cmd arguments
     
-    job.setMapperClass(MaxTemperatureMapper.class); //setting mapper class
-    job.setReducerClass(MaxTemperatureReducer.class);//setting reducer class
+    job.setMapperClass(MaxTemperatureMapper.class); //mapper class
+    job.setReducerClass(MaxTemperatureReducer.class);//reducer class
 
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(IntWritable.class);
